@@ -1,0 +1,23 @@
+# interact with the OpenAI API
+openai==1.36.0
+
+# interact with llama3 groq API models
+groq==0.9.0
+
+# load API environment variables from a .env file
+python-dotenv
+
+# for UI integration as fastapi
+nicegui==1.4.29
+
+# high performance asynchronous HTTP client/server
+aiohttp==3.9.5
+
+# concurrent async/await code for asynchronous I/O
+asyncio==3.4.3
+
+# For fast JSON processing
+ujson==5.10.0
+
+# system and process utilities
+psutil==6.0.0
