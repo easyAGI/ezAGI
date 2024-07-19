@@ -4,6 +4,11 @@ easy Augmented Generative Intelligence for LLM
 an exercise in multi-model integration and LLM rational enhancement from ezAGI
 llama3 integration using together.ai and ollama for llama3
 
+
+# requirements
+python3 > 3.7
+pip
+
 # LINUX INSTALL
 
 sudo apt install git
