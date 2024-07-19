@@ -1,8 +1,10 @@
 # ezAGI
 easy Augmented Generative Intelligence for LLM
 
-an exercise in multi-model integration and LLM rational enhancement from ezAGI
-llama3 integration using together.ai and ollama for llama3
+an exercise in multi-model integration for LLM rational enhancement from ezAGI
+with a focus on llama3 integration using ollama in tandem with together.ai llama3
+
+easyAGI has been tested with groq API, openAI API, ollama llama3 from URL, and together.ai API for llama3
 
 
 # requirements
