@@ -1,6 +1,9 @@
 # ezAGI
 easy Augmented Generative Intelligence for LLM
 
+an exercise in multi-model integration with the easy rational AGI
+llama3 integration using together.ai and ollama for llama3
+
 # LINUX INSTALL
 
 ```bash
