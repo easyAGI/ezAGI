@@ -1,0 +1,309 @@
+/* General Body Styles */
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-image: url('/gfx/funAGIbkgrd.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: #1f2937;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+# link style for link under chat input
+a:link, a:visited {
+    color: inherit !important;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* Header Styles */
+header {
+    background-color: transparent; /* Transparent background */
+    #color: white;
+    padding: 1rem;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+# response window controls main from ui.tab_panels(tabs, value=chat_tab) from .classes('response-style')
+
+.response-style {
+    padding: 10px;
+    border-radius: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 90%; /* Default to 90% width for centering */
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-grow: 1;
+    flex-basis: 0;
+    border: 0px solid #218838;
+    background-color: rgba(255, 255, 255, 0.5); /* White background with 50% transparency */
+}
+
+/* Input Field Styles */
+.input {
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-grow: 1;
+    flex-basis: 0;
+    border: 2px solid #218838;
+    background-color: transparent;
+    color: #218838;
+    border-radius: 5px;
+    margin-left: 0.75rem; /* mx-3 */
+    background-color: #e6f4ea; /* bg-green-100 */
+    font-family: 'Courier New', Courier, monospace; /* input-class="font-mono" */
+}
+
+.input:focus {
+    border-color: #34d058; /* Lighter green border */
+    color: #34d058; /* Lighter green text */
+    outline: none; /* Removes default focus outline */
+}
+
+
+/* API Action Styles */
+.api-action {
+    padding: 10px 15px;
+    font-size: 14px;
+    color: #ffffff;
+    background-color: #218838;
+    border: none;
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-decoration: none; /* Ensures no underline by default */
+}
+
+.api-action:hover {
+    background-color: #1e7e34;
+}
+
+.api-action:active,
+.api-action:focus {
+    background-color: #1c7430;
+    color: #a4df90; /* Lighter green color for text */
+    outline: none; /* Removes default focus outline */
+    box-shadow: 0 0 0 2px #a4df90; /* Adds a lighter green outline for focus */
+}
+
+/* Ensure the response field is visible and centered before input */
+.response-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: rgba(255, 255, 255, 0.666); /* White background with 66.6% transparency */
+}
+
+.footer {
+    padding: 10px;
+    border-radius: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 90%;
+    max-width: 2xl;
+    margin: 0 auto;
+    flex-grow: 1;
+    flex-basis: 0;
+    border: 0px solid #218838;
+    background-color: rgba(255, 255, 255, 0.5); /* White background with 50% transparency */
+}
+
+# control style for interaction tabs of chat, logs, apik from .classes('tabs-style')
+
+.tab-style {
+    color: #218838; 
+    font-weight: bold; 
+    background-color: #e2e6ea; 
+    font-size: 16px; 
+    padding: 10px; 
+    border: 3px groove #218838; 
+    border-radius: 5px; 
+    transition: background-color 300ms ease-in-out, box-shadow 300ms ease-in-out;
+    margin-left: 0.5rem; /* ml-2 in Tailwind */
+    padding-top: 0.5rem; /* py-2 in Tailwind */
+    padding-bottom: 0.5rem; /* py-2 in Tailwind */
+    padding-left: 1rem; /* px-4 in Tailwind */
+    padding-right: 1rem; /* px-4 in Tailwind */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.666); /* shadow-md in Tailwind */
+}
+
+.tab-style:hover {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); /* hover:shadow-lg in Tailwind */
+}
+
+.tab-style:active {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* active:shadow-sm in Tailwind */
+}
+
+
+
+# darkmode button row style
+.darkrow {
+    color: #ADD8E6;
+    background-color: #1C3D5A;
+    font-weight: bold;
+    font-size: 16px;
+    width: 150px;
+    padding: 10px;
+    border: 2px solid #1C3D5A;
+    border-radius: 5px;
+    transition: background-color 200ms ease-in-out, box-shadow 200ms ease-in-out;
+    margin-left: 0.5rem; /* ml-2 equivalent in Tailwind CSS */
+    padding-top: 0.5rem; /* py-2 equivalent in Tailwind CSS */
+    padding-bottom: 0.5rem; /* py-2 equivalent in Tailwind CSS */
+    padding-left: 1rem; /* px-4 equivalent in Tailwind CSS */
+    padding-right: 1rem; /* px-4 equivalent in Tailwind CSS */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md equivalent in Tailwind CSS */
+}
+
+.darkrow:hover {
+    background-color: #1B2E40; /* hover:bg-blue-900 equivalent in Tailwind CSS */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-md equivalent in Tailwind CSS */
+}
+
+.darkrow:active {
+    background-color: #1E3A61; /* active:bg-blue-700 equivalent in Tailwind CSS */
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06); /* shadow-sm equivalent in Tailwind CSS */
+}
+
+/* Dark mode version */
+@media (prefers-color-scheme: dark) {
+    .darkrow {
+        color: #90C3D4;
+        background-color: #122637;
+        border: 2px solid #122637;
+    }
+
+    .darkrow:hover {
+        background-color: #0F1E2A; /* Adjusted for dark mode */
+    }
+
+    .darkrow:active {
+        background-color: #13273C; /* Adjusted for dark mode */
+    }
+}
+
+
+# Default (light mode) styles for .logbuttons
+.logbuttons {
+    color: #ADD8E6; /* Light blue text color */
+    font-weight: bold; /* Bold text */
+    background-color: #1C3D5A; /* Dark blue background color */
+    font-size: 16px; /* Font size set to 16 pixels */
+    width: 150px; /* Fixed width of 150 pixels */
+    padding: 10px; /* Padding of 10 pixels on all sides */
+    border: 2px solid #1C3D5A; /* Dark blue solid border with 2px width */
+    border-radius: 5px; /* Rounded corners with 5px radius */
+    display: flex; /* Enables flexbox layout */
+    justify-content: center; /* Centers content horizontally */
+}
+
+# Dark mode styles for .logbuttons
+
+@media (prefers-color-scheme: dark) {
+    .logbuttons {
+        color: #90C3D4; /* Slightly darker blue text color */
+        background-color: #122637; /* Even darker background color */
+        border: 2px solid #122637; /* Border color matches dark mode background */
+    }
+}
+
+
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .main-content, .nicegui-content {
+        padding: 2rem;
+        margin: 2rem auto;
+        width: 90%;
+    }
+
+    header {
+        font-size: 1.45rem;
+    }
+
+    .button {
+        padding: 0.75rem 1.5rem;
+    }
+
+    .response-container {
+        padding: 1rem;
+        margin: 1rem auto;
+        width: 90%;
+    }
+
+    .response-text {
+        font-size: 1rem;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .main-content, .nicegui-content {
+        padding: 2rem;
+        margin: 2rem auto;
+        width: 85%;
+    }
+
+    header {
+        font-size: 1.5rem;
+    }
+
+    .button {
+        padding: 0.75rem 1.5rem;
+    }
+
+    .response-container {
+        padding: 1rem;
+        margin: 1rem auto;
+        width: 85%;
+    }
+
+    .response-text {
+        font-size: 1rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    .main-content, .nicegui-content {
+        padding: 2rem;
+        margin: 2rem auto;
+        width: 80%;
+    }
+
+    header {
+        font-size: 1.5rem;
+    }
+
+    .button {
+        padding: 0.75rem 1.5rem;
+    }
+
+    .response-container {
+        padding: 1rem;
+        margin: 1rem auto;
+        width: 80%;
+    }
+
+    .response-text {
+        font-size: 1rem;
+    }
+}
