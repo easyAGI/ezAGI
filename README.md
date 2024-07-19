@@ -9,7 +9,10 @@ easyAGI has been tested with groq API, openAI API, ollama llama3 from URL, and t
 
 # requirements
 python3 > 3.7<br />
-pip
+pip<br />
+<a href="https://console.groq.com/docs/quickstart">groq API key</a> or <br />
+<a href="https://openai.com/index/openai-api/">openai API key</a> or <br />
+
 
 # LINUX INSTALL
 
