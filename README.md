@@ -6,6 +6,8 @@ llama3 integration using together.ai and ollama for llama3
 
 # LINUX INSTALL
 
+sudo apt install git
+
 ```bash
 git clone https://github.com/easyGLM/ezAGI/
 cd ezAGI
