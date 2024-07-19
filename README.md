@@ -6,7 +6,7 @@ llama3 integration using together.ai and ollama for llama3
 
 
 # requirements
-python3 > 3.7
+python3 > 3.7<br />
 pip
 
 # LINUX INSTALL
