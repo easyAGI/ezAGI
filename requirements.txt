@@ -4,6 +4,9 @@ openai==1.36.0
 # interact with llama3 groq API models
 groq==0.9.0
 
+# interact with the together.ai API models
+together==1.2.2
+
 # load API environment variables from a .env file
 python-dotenv
 
