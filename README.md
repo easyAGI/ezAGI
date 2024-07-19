@@ -25,7 +25,7 @@ python3 ezAGI.py
 
 # WINDOWS INSTALL
 
-#open command prompt
+open command prompt
 ```bash
 Press Win + R, type cmd, press Enter
 ```
