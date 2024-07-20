@@ -122,7 +122,7 @@ class OllamaHandler:
         """
         Test Ollama by generating a response to a default prompt.
         """
-        return await self.generate_response_async("explain easy Augmented Generative Intelligence as a framework", self.selected_model)
+        return await self.generate_response_async("explain easy Augmented Generative Intelligence LLM reasoning enhancement framework", self.selected_model)
 
     def select_model(self, model_name):
         """
