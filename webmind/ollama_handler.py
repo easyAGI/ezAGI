@@ -1,8 +1,13 @@
+# ollama_handler.py
+# code extrapolated from ollama-python for interaction with an ollama installation
+# ollama_handler (c) 2024 codephreak MIT licence
+
 import logging
 import subprocess
 import asyncio
 import aiohttp
 import ujson as json
+from nicegui import ui
 
 class OllamaHandler:
     """
@@ -73,7 +78,7 @@ class OllamaHandler:
             logging.error(f"Ollama API error: {e}")
             return "Error: Unable to generate a response due to an issue with the Ollama API."
 
-    async def show_ollama_info_async(self):
+    async def show_ollama_info_async(self, container):
         """
         Show information about the Ollama service.
         """
@@ -82,19 +87,26 @@ class OllamaHandler:
             result = await asyncio.create_subprocess_shell(command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
             stdout, stderr = await result.communicate()
             if result.returncode == 0:
+                with container:  # Ensure the correct UI context
+                    ui.notify('Ollama information displayed successfully.', type='positive')
                 return stdout.decode().strip()
             else:
                 logging.error(f"Ollama API error: {stderr.decode().strip()}")
+                with container:  # Ensure the correct UI context
+                    ui.notify(f'Error displaying Ollama information: {stderr.decode().strip()}', type='negative')
                 return ""
         except Exception as e:
             logging.error(f"Ollama API error: {e}")
+            with container:  # Ensure the correct UI context
+                ui.notify(f'Exception occurred while showing Ollama information: {e}', type='negative')
             return ""
 
     def install_ollama(self):
         """
-        Install Ollama using the provided installation script.
+        deb variant Linux install Ollama on using the provided installation script
+        terminal command as subprocess
         """
-        command = "curl -fsSL https://ollama.com/install.sh | sh"
+        command = "sudo curl -fsSL https://ollama.com/install.sh | sh"
         try:
             result = subprocess.run(command, shell=True, capture_output=True, text=True)
             if result.returncode == 0:
