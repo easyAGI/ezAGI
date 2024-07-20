@@ -7,8 +7,7 @@ import concurrent.futures # asynchronous concurrent execution
 import aiohttp # asynchronous HTTP client/server
 import asyncio # asynchronous I/O for network
 import logging # logging for error handling
-import ujson # faster json file handling
-
+import ujson as json # faster json file handling
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
