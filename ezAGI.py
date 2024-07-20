@@ -1,3 +1,4 @@
+# ollama UI (c) 2024 Gregory L. Magnusson MIT licence
 from nicegui import ui, app  # handle UIUX
 from fastapi.staticfiles import StaticFiles  # integrate fastapi static folder and gfx folder
 from webmind.chatter import OllamaModel, check_ollama_installation
@@ -20,7 +21,7 @@ class OllamaAGI:
         self.init_ui()
 
     def init_ui(self):
-        ui.label('Ollama AGI Interface').classes('text-2xl mb-4')
+        ui.label('ezAGI').classes('text-2xl mb-4')
 
         with ui.tabs().classes('w-full') as tabs:
             chat_tab = ui.tab('Chat')
@@ -131,13 +132,17 @@ class OllamaAGI:
                 async with session.post(self.ollama_model.api_url + "/generate", json=payload) as response:
                     async for line in response.content:
                         if line:
-                            data = json.loads(line.decode('utf-8'))
-                            if "response" in data:
-                                response_content += data["response"]
-                                self.response_output.set_text(response_content)
-                            elif "error" in data:
-                                logging.error(f"Error in response: {data['error']}")
-                                ui.notify(f"Error: {data['error']}", type='negative')
+                            try:
+                                data = json.loads(line.decode('utf-8'))
+                                if "response" in data:
+                                    response_content += data["response"]
+                                    self.response_output.set_text(response_content)
+                                elif "error" in data:
+                                    logging.error(f"Error in response: {data['error']}")
+                                    ui.notify(f"Error: {data['error']}", type='negative')
+                            except json.JSONDecodeError as e:
+                                logging.error(f"JSON decode error: {e}")
+                                ui.notify(f"JSON decode error: {e}", type='negative')
                 logging.info("Generated response successfully.")
         except Exception as e:
             logging.error(f"Error generating response: {e}")
@@ -177,13 +182,17 @@ class OllamaAGI:
                 async with session.post(self.ollama_model.api_url + "/generate", json=payload) as response:
                     async for line in response.content:
                         if line:
-                            data = json.loads(line.decode('utf-8'))
-                            if "response" in data:
-                                response_content += data["response"]
-                            elif "error" in data:
-                                logging.error(f"Error in response: {data['error']}")
-                                with self.message_container:
-                                    ui.notify(f"Error: {data['error']}", type='negative')
+                            try:
+                                data = json.loads(line.decode('utf-8'))
+                                if "response" in data:
+                                    response_content += data["response"]
+                                elif "error" in data:
+                                    logging.error(f"Error in response: {data['error']}")
+                                    with self.message_container:
+                                        ui.notify(f"Error: {data['error']}", type='negative')
+                            except json.JSONDecodeError as e:
+                                logging.error(f"JSON decode error: {e}")
+                                ui.notify(f"JSON decode error: {e}", type='negative')
                 logging.info("Ollama test completed successfully.")
                 with self.message_container:
                     self.response_output.set_text(f"Test prompt: {prompt}\nResponse: {response_content}")
