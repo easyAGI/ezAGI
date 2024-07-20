@@ -1,7 +1,7 @@
 # openmind.py (c) 2024  Gregory L. Magnusson MIT licence
 
 
-openmind.py is the core module of the EasyAGI project that handles the interaction between the user interface and the underlying augemented generative intelligence (AGI) system. This module is responsible for managing API keys, initializing AGI instances, processing user inputs, and displaying results. It integrates with various services like OpenAI, Groq, and LLaMA.
+openmind.py is the core module of the EasyAGI project that handles the interaction between the user interface and the underlying augemented generative intelligence (AGI) system. This module is responsible for managing API keys, initializing AGI instances, processing user inputs, and displaying results. It integrates with various services like OpenAI, Groq, and LLaMA. The openmind.py script provides the internal reasoning loop for the continuous functioning of the Augmented Generative Intelligence (AGI) without user interaction. It ensures non-blocking execution and efficient concurrency through asynchronous tasks. The script integrates modules from automind for reasoning, webmind for API and model handling, and memory for storing inputs and responses.
 
 # Dependencies
 
