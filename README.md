@@ -12,6 +12,7 @@ python3 > 3.7<br />
 pip<br />
 <a href="https://console.groq.com/docs/quickstart">groq API key</a> or <br />
 <a href="https://openai.com/index/openai-api/">openai API key</a> or <br />
+<a href="https://api.together.xyz/signin?redirectUrl=/settings/api-keys">together.ai</a><br />
 
 
 # LINUX INSTALL
