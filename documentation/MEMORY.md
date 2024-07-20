@@ -18,13 +18,13 @@ Constants
 The following constants define the folder structure for the memory system:
 ```python
 MEMORY_FOLDER = "./memory/"
-STM_FOLDER = MEMORY_FOLDER + "stm/"
-LTM_FOLDER = MEMORY_FOLDER + "ltm/"
-EPISODIC_FOLDER = MEMORY_FOLDER + "episodic/"
-TRUTH_FOLDER = MEMORY_FOLDER + "truth/"
-LOGS_FOLDER = MEMORY_FOLDER + "logs/"
-MINDX_FOLDER = "./mindx/"
-AGENCY_FOLDER = MINDX_FOLDER + "agency/"
+STM_FOLDER = MEMORY_FOLDER + "stm/" # short term memory
+LTM_FOLDER = MEMORY_FOLDER + "ltm/" # long term memory
+EPISODIC_FOLDER = MEMORY_FOLDER + "episodic/" # memory from experience
+TRUTH_FOLDER = MEMORY_FOLDER + "truth/" # storage of beliefs, facts and truth
+LOGS_FOLDER = MEMORY_FOLDER + "logs/" # txt files for general logging
+MINDX_FOLDER = "./mindx/" # executable folder for agents
+AGENCY_FOLDER = MINDX_FOLDER + "agency/" # completed agents
 ```
 # Classes
 
