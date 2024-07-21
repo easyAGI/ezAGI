@@ -44,20 +44,9 @@ pip install -r requirements.txt
 # activate ezAGI.py with internal reasoning (EXPERIMENTAL)
 python3 ezAGI.py
 ```
-
-# UJSON INSTALL IN WINDOW
-Solution for no module named json error found while working with python3 after installing through requirement file as well as separately, then use this command:
-```bash
-python3 -m pip install ujson
+is possible that windows requires to install the requirements<br />
+```python
+python3 -m pip install -r requirements.txt
 ```
 
-# OPENAI INSTALL IN WINDOW
-Solution for no module named openai error found while working with python3, then use this command:
-```bash
-python3 -m pip install openai
-```
-# GROQ INSTALL IN WINDOW
-Solution for no module named  error found while working with python3, then use this command:
-```bash
-python3 -m pip install groq
-```
+
