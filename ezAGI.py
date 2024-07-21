@@ -69,10 +69,10 @@ def main():
     log_files = {
         "Premises Log": "./memory/logs/premises.json",
         "Not Premise Log": "./memory/logs/notpremise.json",
-        "Truth Tables Log": "./memory/logs/truth_tables.json",
+        "Truth Tables Log": "./memory/truth/logs.txt",
         "Thoughts Log": "./memory/logs/thoughts.json",
         "Conclusions Log": "./memory/logs/conclusions.txt",
-        "Decisions Log": "./memory/logs/decisions.json"
+        "Decisions Log": "./memory/logs/truth.json"
     }
 
     # function to view log files
