@@ -6,13 +6,14 @@
 
 from nicegui import ui, app  # handle UIUX
 from fastapi.staticfiles import StaticFiles  # integrate fastapi static folder and gfx folder
+from webmind.ollama_handler import OllamaHandler  # Import OllamaHandler for modular Ollama interactions
+from webmind.html_head import add_head_html  # handler for the html head imports and meta tags
+from automind.openmind import OpenMind  # Importing OpenMind class from openmind.py
+import concurrent.futures
+import ujson as json
 import asyncio
 import aiohttp
-import concurrent.futures
 import logging
-import ujson as json
-from automind.openmind import OpenMind  # Importing OpenMind class from openmind.py
-from webmind.html_head import add_head_html  # handler for the html head imports and meta tags
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
