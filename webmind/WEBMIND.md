@@ -1,1 +1,1 @@
-foler to handle API and llama3 url integrations
+folder to handle API and llama3 url integrations
