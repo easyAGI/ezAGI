@@ -39,7 +39,7 @@ Press Win + R, type cmd, press Enter
 git clone https://github.com/easyGLM/ezAGI/
 cd ezAGI
 python3 -m venv agi
-agi\Scripts\activatep
+agi\Scripts\activate
 pip install -r requirements.txt
 # activate ezAGI.py with internal reasoning (EXPERIMENTAL)
 python3 ezAGI.py
