@@ -1,6 +1,6 @@
 # ezAGI.py multi-model LLM with automind reasoning from premise to draw_conclusion
 # ezAGI (c) Gregory L. Magnusson MIT license 2024
-# conversation from main_loop(self) is saved to ./memory/stm/timestampmemeory.json from memory.py creating short term memory store of input response
+# conversation from main_loop(self) is saved to ./memory/stm/timestampmemory.json from memory.py creating short term memory store of input response
 # reasoning_loop(self)conversation from internal_conclusions are saved in ./memory/logs/thoughts.json
 # easy augmented generative intelligence UIUX
 
@@ -59,10 +59,9 @@ def main():
                 fab_action_container = ui.element('div').props('vertical')
                 keys_list = openmind.api_manager.api_keys.items()
                 for service, key in keys_list:
-                    def create_fab_action(service, key):
+                    def create_fab_action(service):
                         ui.element('q-fab-action').props(f'icon=label color=green-5 label="{service}"').on('click', lambda: openmind.select_model(service))
-
-                    create_fab_action(service, key)
+                    create_fab_action(service)
         dark_mode_toggle = ui.button('Dark Mode', on_click=toggle_dark_mode).classes('light-mode-toggle')
 
     # define log files and their paths
@@ -110,7 +109,7 @@ def main():
         with ui.tab_panel(api_tab):
             ui.label('Manage API Keys').classes('text-lg font-bold')
             with ui.row().classes('items-center'):
-                openmind.service_input = ui.input('Service (e.g., "openai", "groq")').classes('flex-1 input')
+                openmind.service_input = ui.input('("together", "openai", "groq")').classes('flex-1 input')
                 openmind.key_input = ui.input('API Key').classes('flex-1 input')
             with ui.dropdown_button('Actions', auto_close=True):
                 ui.menu_item('Add API Key', on_click=openmind.add_api_key).classes('api-action')
