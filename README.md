@@ -45,8 +45,9 @@ pip install -r requirements.txt
 python3 ezAGI.py
 ```
 
-##if no module json error found while working with python3 after installing through requirement file and ujson separately, then use this command:
+#Solution for no module json error found while working with python3 after installing through requirement file as well as separately, then use this command:
 
+````bash
 python3 -m pip install ujson
 
 
