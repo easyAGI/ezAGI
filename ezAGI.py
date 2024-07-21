@@ -1,4 +1,4 @@
-# ezAGI.py multi-model
+# ezAGI.py multi-model LLM with automind reasoning from premise to draw_conclusion
 # ezAGI (c) Gregory L. Magnusson MIT license 2024
 # conversation from main_loop(self) is saved to ./memory/stm/timestampmemeory.json from memory.py creating short term memory store of input response
 # reasoning_loop(self)conversation from internal_conclusions are saved in ./memory/logs/thoughts.json
@@ -13,7 +13,6 @@ import logging
 import ujson as json
 from automind.openmind import OpenMind  # Importing OpenMind class from openmind.py
 from webmind.html_head import add_head_html  # handler for the html head imports and meta tags
-from webmind.ollama_handler import OllamaHandler  # Import OllamaHandler for modular Ollama interactions
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -22,7 +21,6 @@ logging.basicConfig(level=logging.DEBUG)
 app.mount('/gfx', StaticFiles(directory='gfx'), name='gfx')
 
 openmind = OpenMind()  # initialize OpenMind instance
-ollama_handler = OllamaHandler()  # initialize OllamaHandler instance
 
 @ui.page('/')
 def main():
@@ -46,7 +44,7 @@ def main():
         dark_mode.value = not dark_mode.value  # toggle dark mode value
         dark_mode_toggle.set_text('Light Mode' if dark_mode.value else 'Dark Mode')  # update button
         dark_mode_toggle.classes(remove='light-mode-toggle' if dark_mode.value else 'dark-mode-toggle')  # class remove for dark-mode / light-mode
-        dark_mode_toggle.classes(add='dark-mode-toggle' if dark_mode.value else 'light-mode-toggle')  # dark_mode toggle swtich
+        dark_mode_toggle.classes(add='dark-mode-toggle' if dark_mode.value else 'light-mode-toggle')  # dark_mode toggle switch
 
         # update log button styles based on dark mode
         for button in log_buttons:
@@ -58,10 +56,12 @@ def main():
         with ui.row().classes('items-center'):
             with ui.element('q-fab').props('icon=menu color=blue position=fixed top-2 left-2'):
                 fab_action_container = ui.element('div').props('vertical')
-                if ollama_handler.check_installation():
-                    models = ollama_handler.list_models()
-                    for model in models:
-                        ui.element('q-fab-action').props(f'icon=label color=green-5 label="{model}"').on('click', lambda m=model: ollama_handler.select_model(m))
+                keys_list = openmind.api_manager.api_keys.items()
+                for service, key in keys_list:
+                    def create_fab_action(service, key):
+                        ui.element('q-fab-action').props(f'icon=label color=green-5 label="{service}"').on('click', lambda: openmind.select_model(service))
+
+                    create_fab_action(service, key)
         dark_mode_toggle = ui.button('Dark Mode', on_click=toggle_dark_mode).classes('light-mode-toggle')
 
     # define log files and their paths
@@ -179,33 +179,36 @@ def ollama_page():
             self.response_output = ui.label().classes('text-lg mt-4')
 
         def check_installation(self):
-            if self.ollama_model.check_installation():
-                ui.notify('Ollama is installed and accessible.', type='positive')
-                logging.info("Ollama is installed and accessible.")
-            else:
-                ui.notify('Ollama is not installed or accessible.', type='negative')
-                logging.warning("Ollama is not installed or accessible.")
+            with self.message_container:
+                if self.ollama_model.check_installation():
+                    ui.notify('Ollama is installed and accessible.', type='positive')
+                    logging.info("Ollama is installed and accessible.")
+                else:
+                    ui.notify('Ollama is not installed or accessible.', type='negative')
+                    logging.warning("Ollama is not installed or accessible.")
 
         def list_models(self):
             try:
                 logging.debug("Running 'ollama list' command.")
                 result = self.ollama_model.list_models()
-                if result:
-                    logging.debug(f"'ollama list' output:\n{result}")
-                    self.models = [line.split()[0] for line in result[1:]]  # Extract model names
-                    if self.models:
-                        ui.notify('Models listed successfully.', type='positive')
-                        logging.info("Models listed successfully.")
-                        self.update_fab_actions()
+                with self.message_container:
+                    if result:
+                        logging.debug(f"'ollama list' output:\n{result}")
+                        self.models = [line.split()[0] for line in result[1:]]  # Extract model names
+                        if self.models:
+                            ui.notify('Models listed successfully.', type='positive')
+                            logging.info("Models listed successfully.")
+                            self.update_fab_actions()
+                        else:
+                            ui.notify('No models found.', type='negative')
+                            logging.warning("No models found.")
                     else:
-                        ui.notify('No models found.', type='negative')
-                        logging.warning("No models found.")
-                else:
-                    logging.error("Error listing models.")
-                    ui.notify('Error listing models.', type='negative')
+                        logging.error("Error listing models.")
+                        ui.notify('Error listing models.', type='negative')
             except Exception as e:
                 logging.error(f"Exception during model listing: {e}")
-                ui.notify('Exception occurred while listing models.', type='negative')
+                with self.message_container:
+                    ui.notify('Exception occurred while listing models.', type='negative')
 
         def update_fab_actions(self):
             logging.debug("Clearing existing FAB actions.")
@@ -216,9 +219,10 @@ def ollama_page():
                     ui.element('q-fab-action').props(f'icon=label color=green-5 label="{model}"').on('click', lambda m=model: self.select_model(m))
 
         def select_model(self, model_name):
-            self.selected_model = model_name
-            ui.notify(f'Selected model: {model_name}', type='info')
-            logging.info(f"Selected model: {model_name}")
+            with self.message_container:
+                self.selected_model = model_name
+                ui.notify(f'Selected model: {model_name}', type='info')
+                logging.info(f"Selected model: {model_name}")
 
         async def handle_generate_response(self, e):
             await self.generate_response()
@@ -226,11 +230,13 @@ def ollama_page():
         async def generate_response(self):
             prompt = self.text_input.value
             if not prompt:
-                ui.notify('Please enter a prompt.', type='warning')
+                with self.message_container:
+                    ui.notify('Please enter a prompt.', type='warning')
                 logging.warning("No prompt entered. Please enter a prompt.")
                 return
             if not self.selected_model:
-                ui.notify('Please select a model first.', type='warning')
+                with self.message_container:
+                    ui.notify('Please select a model first.', type='warning')
                 logging.warning("No model selected. Please select a model first.")
                 return
 
@@ -253,25 +259,26 @@ def ollama_page():
                                     self.response_output.set_text(response_content)
                                 elif "error" in data:
                                     logging.error(f"Error in response: {data['error']}")
-                                    ui.notify(f"Error: {data['error']}", type='negative')
+                                    with self.message_container:
+                                        ui.notify(f"Error: {data['error']}", type='negative')
                     logging.info("Generated response successfully.")
             except Exception as e:
                 logging.error(f"Error generating response: {e}")
-                ui.notify(f"Error generating response: {e}", type='negative')
+                with self.message_container:
+                    ui.notify(f"Error generating response: {e}", type='negative')
 
         async def show_ollama_info(self):
             try:
                 logging.debug("Running 'ollama show' command.")
-                result = await self.ollama_model.show_ollama_info_async()
-                if result:
-                    logging.debug(f"'ollama show' output:\n{result}")
-                    with self.message_container:
+                result = await self.ollama_model.show_ollama_info_async(self.message_container)
+                with self.message_container:
+                    if result:
+                        logging.debug(f"'ollama show' output:\n{result}")
                         self.response_output.set_text(result)
-                    ui.notify('Ollama information displayed successfully.', type='positive')
-                    logging.info("Ollama information displayed successfully.")
-                else:
-                    logging.error("Error displaying Ollama information.")
-                    with self.message_container:
+                        ui.notify('Ollama information displayed successfully.', type='positive')
+                        logging.info("Ollama information displayed successfully.")
+                    else:
+                        logging.error("Error displaying Ollama information.")
                         ui.notify('Error displaying Ollama information.', type='negative')
             except Exception as e:
                 logging.error(f"Exception during showing Ollama information: {e}")
