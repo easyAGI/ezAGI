@@ -7,7 +7,6 @@
 # log internal reasoning conclusion     ./memory/logs/thoughts.json
 # log not premise                       ./memory/logs/notpremise.json
 # log short term memory input response  ./memory/stm/{timestamp}memory.json 
-# log internal reasoning                ./mindx/
 
 import os
 import time
@@ -46,7 +45,9 @@ class OpenMind:
     def use_api_key(self, service, key):
         self.api_manager.api_keys[service] = key
         self.initialize_agi()
-        asyncio.create_task(self.notify_ui(f'Using API key for {service}', 'positive'))
+        if self.message_container.client.connected:
+            with self.message_container:
+                ui.notify(f'Using API key for {service}', type='positive')
         logging.info(f'Using API key for {service}')
 
     def add_api_key(self):
@@ -57,12 +58,13 @@ class OpenMind:
             self.api_manager.api_keys[service] = api_key
             self.api_manager.save_api_key(service, api_key)
             self.initialize_agi()
-            asyncio.create_task(self.notify_ui(f'API key for {service} added and loaded successfully'))
+            if self.message_container.client.connected:
+                ui.notify(f'API key for {service} added and loaded successfully')
             self.service_input.value = ''
             self.key_input.value = ''
             ui.run_javascript('setTimeout(() => { window.location.href = "/"; }, 1000);')
         else:
-            asyncio.create_task(self.notify_ui('Please provide both service name and API key'))
+            ui.notify('Please provide both service name and API key')
 
     def delete_api_key(self, service):
         logging.debug(f"Deleting API key for {service}")
@@ -70,10 +72,11 @@ class OpenMind:
             del self.api_manager.api_keys[service]
             self.api_manager.remove_api_key(service)
             self.initialize_agi()
-            asyncio.create_task(self.notify_ui(f'API key for {service} removed successfully'))
+            if self.message_container.client.connected:
+                ui.notify(f'API key for {service} removed successfully')
             self.list_api_keys()  # Refresh the list after deletion
         else:
-            asyncio.create_task(self.notify_ui(f'No API key found for {service}'))
+            ui.notify(f'No API key found for {service}')
 
     def list_api_keys(self):
         if self.api_manager.api_keys:
@@ -85,9 +88,10 @@ class OpenMind:
                     with self.keys_container:
                         ui.label(f"{service}: {key[:4]}...{key[-4:]}").classes('flex-1')
                         ui.button('Delete', on_click=lambda s=service: self.delete_api_key(s)).classes('ml-4')
-                asyncio.create_task(self.notify_ui('Stored API keys:\n' + "\n".join([f"{service}: {key[:4]}...{key[-4:]}"])))
-            else:
-                asyncio.create_task(self.notify_ui('No API keys in storage'))
+                ui.notify('Stored API keys:\n' + "\n".join([f"{service}: {key[:4]}...{key[-4:]}" for service, key in keys_list]))
+        else:
+            if self.keys_container.client.connected:
+                ui.notify('No API keys in storage')
                 self.keys_container.clear()
                 with self.keys_container:
                     ui.label('No API keys in storage')
@@ -98,33 +102,47 @@ class OpenMind:
             if openai_key:
                 chatter = GPT4o(openai_key)                     # openai
                 self.agi_instance = FundamentalAGI(chatter)
-                asyncio.create_task(self.notify_ui('Using OpenAI for AGI'))
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify('Using OpenAI for AGI')
                 logging.debug("AGI initialized with OpenAI")
             else:
-                asyncio.create_task(self.notify_ui('OpenAI API key not found. Please add the key first.', 'negative'))
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify('OpenAI API key not found. Please add the key first.', type='negative')
                 logging.warning("OpenAI API key not found.")
         elif model_name == 'groq':
             groq_key = self.api_manager.get_api_key('groq')
             if groq_key:
                 chatter = GroqModel(groq_key)                   # groq
                 self.agi_instance = FundamentalAGI(chatter)
-                asyncio.create_task(self.notify_ui('Using Groq for AGI'))
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify('Using Groq for AGI')
                 logging.debug("AGI initialized with Groq")
             else:
-                asyncio.create_task(self.notify_ui('Groq API key not found. Please add the key first.', 'negative'))
-                logging.warning("Groq API key not found")
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify('Groq API key not found. Please add the key first.', type='negative')
+                logging.warning("Groq API key not found.")
         elif model_name == 'together':
             together_key = self.api_manager.get_api_key('together')
             if together_key:
                 chatter = TogetherModel(together_key)  # together
                 self.agi_instance = FundamentalAGI(chatter)
-                asyncio.create_task(self.notify_ui('Using Together AI for AGI'))
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify('Using Together AI for AGI')
                 logging.debug("AGI initialized with Together AI")
             else:
-                asyncio.create_task(self.notify_ui('Together AI API key not found. Please add the key first.', 'negative'))
-                logging.warning("Together AI API key not found")
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify('Together AI API key not found. Please add the key first.', type='negative')
+                logging.warning("Together AI API key not found.")
         else:
-            asyncio.create_task(self.notify_ui(f'Using {model_name} for AGI'))
+            if self.message_container.client.connected:
+                with self.message_container:
+                    ui.notify(f'Using {model_name} for AGI')
             logging.debug(f"AGI initialized with {model_name}")
 
     def initialize_agi(self):
@@ -136,32 +154,45 @@ class OpenMind:
         if openai_key:
             chatter = GPT4o(openai_key)
             self.agi_instance = FundamentalAGI(chatter)
-            asyncio.create_task(self.notify_ui('Using OpenAI for ezAGI'))
+            if self.message_container.client.connected:
+                with self.message_container:
+                    ui.notify('using OpenAI for ezAGI')
             logging.debug("AGI initialized with OpenAI")
         elif groq_key:
             chatter = GroqModel(groq_key)
             self.agi_instance = FundamentalAGI(chatter)
-            asyncio.create_task(self.notify_ui('Using Groq for ezAGI'))
+            if self.message_container.client.connected:
+                with self.message_container:
+                    ui.notify('using Groq for ezAGI')
             logging.debug("AGI initialized with Groq")
         elif together_key:
             chatter = TogetherModel(together_key)
             self.agi_instance = FundamentalAGI(chatter)
-            asyncio.create_task(self.notify_ui('Using Together AI for ezAGI'))
+            if self.message_container.client.connected:
+                with self.message_container:
+                    ui.notify('using Together AI for AezGI')
             logging.debug("AGI initialized with Together AI")
         elif llama_running:
+            # Call ollama_handler to list models when LLaMA is found running
             models = self.ollama_handler.list_models()
             if models:
                 model_list = ", ".join(models)
-                asyncio.create_task(self.notify_ui(f'LLaMA found running. Models available: {model_list}'))
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify(f'LLaMA found running. Models available: {model_list}')
                 logging.debug(f"LLaMA running on localhost:11434. Models available: {model_list}")
             else:
-                asyncio.create_task(self.notify_ui('LLaMA found running, but no models are available.'))
-                logging.debug("LLaMA running on localhost:11434, but no models are available")
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify('LLaMA found running, but no models are available.')
+                logging.debug("LLaMA running on localhost:11434, but no models are available.")
         else:
             self.agi_instance = None
             if not self.initialization_warning_shown:
-                asyncio.create_task(self.notify_ui('No valid API key or LLaMA instance found. Please add an API key or start LLaMA'))
-                logging.debug("No valid API key or LLaMA instance found. AGI not initialized")
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify('No valid API key or LLaMA instance found. Please add an API key or start LLaMA.')
+                logging.debug("No valid API key or LLaMA instance found. AGI not initialized.")
                 self.initialization_warning_shown = True
 
     def check_llama_running(self):
@@ -174,16 +205,28 @@ class OpenMind:
         return False
 
     async def get_conclusion_from_agi(self, prompt):
+        """
+        Get a conclusion from the AGI based on the provided prompt.
+        This method is asynchronous to allow non-blocking operations.
+        """
         if self.agi_instance is None:
-            return "AGI not initialized. Please add an API key or start LLaMA"
+            return "AGI not initialized. Please add an API key or start LLaMA."
         conclusion = await asyncio.get_event_loop().run_in_executor(None, self.agi_instance.get_conclusion_from_agi, prompt)
         return conclusion
 
     def communicate_response(self, conclusion):
+        """
+        Log and print the conclusion from the AGI.
+        """
         self.display_internal_conclusion(conclusion)
         return conclusion
 
     async def reasoning_loop(self):
+        """
+        Internal reasoning loop for continuous AGI reasoning without user interaction.
+        This loop adds a prompt to the AGI and processes its conclusion periodically.
+        The conclusions are currently displayed in the response window and saved to ./memory/logs/thoughts.json including ./memory/logs/notpremise.json
+        """
         while True:
             if self.agi_instance is None:
                 openai_key = self.api_manager.get_api_key('openai')
@@ -195,7 +238,9 @@ class OpenMind:
                 else:
                     if not self.initialization_warning_shown:
                         logging.debug("Waiting for API key or LLaMA instance...")
-                        asyncio.create_task(self.notify_ui('AGI not initialized. Add an API key or start LLaMA'))
+                        if self.message_container.client.connected:
+                            with self.message_container:
+                                ui.notify('AGI not initialized add an API key or start LLaMA')
                         self.initialization_warning_shown = True
                     await asyncio.sleep(30)  # Wait before checking again
                     continue
@@ -204,12 +249,17 @@ class OpenMind:
             conclusion = await self.get_conclusion_from_agi(prompt)
             self.display_internal_conclusion(conclusion)
             save_internal_reasoning({"timestamp": int(time.time()), "prompt": prompt, "conclusion": conclusion})
-            asyncio.create_task(self.notify_ui('Reasoning loop conclusion saved'))
+            if self.message_container.client.connected:
+                with self.message_container:
+                    ui.notify('Reasoning loop conclusion saved.')
 
-            await asyncio.sleep(48)  # Adjust the delay as necessary
+            await asyncio.sleep(300)  # Adjust the delay as necessary
 
     def display_internal_conclusion(self, conclusion):
-        if conclusion != "No premises available for logic as conclusion":
+        """
+        Display the internal reasoning conclusion in the response window and log it to a JSON file.
+        """
+        if conclusion != "No premises available for logic as conclusion.":
             if self.message_container.client.connected:
                 with self.message_container:
                     response_message = ui.chat_message(name='intr', sent=False)
@@ -218,12 +268,16 @@ class OpenMind:
                         ui.html(f"{conclusion}")
             logging.info(f"Internal reasoning conclusion: {conclusion}")
 
+        # Determine which log file to write to
         log_entry = {
             "timestamp": datetime.now().isoformat(),
             "conclusion": conclusion
         }
         
-        log_file_path = "./memory/logs/notpremise.json" if conclusion == "No premises available for logic as conclusion" else "./memory/logs/thoughts.json"
+        if conclusion == "No premises available for logic as conclusion.":
+            log_file_path = "./memory/logs/notpremise.json"
+        else:
+            log_file_path = "./memory/logs/thoughts.json"
 
         if not os.path.exists(log_file_path):
             with open(log_file_path, 'w') as file:
@@ -235,10 +289,14 @@ class OpenMind:
                 file.seek(0)
                 json.dump(data, file, indent=4)
 
+        # Also log the conclusions to conclusions.txt
         with open('./memory/logs/conclusions.txt', 'a') as file:
             file.write(f"{datetime.now().isoformat()}: {conclusion}\n")
 
     async def main_loop(self):
+        """
+        Main loop to handle both internal reasoning and user input.
+        """
         reasoning_task = asyncio.create_task(self.reasoning_loop())
         reasoning_task.add_done_callback(self._handle_task_result)
 
@@ -249,6 +307,7 @@ class OpenMind:
             self.prompt = prompt  # Update the prompt with the new input
             conclusion = await self.get_conclusion_from_agi(prompt)
             self.communicate_response(conclusion)
+            # Save the input-response pair using save_conversation_memory
             save_conversation_memory({"dialog": {"instruction": prompt, "response": conclusion}})
 
     async def send_message(self, question):
@@ -267,8 +326,10 @@ class OpenMind:
 
             await self.run_javascript_with_retry('window.scrollTo(0, document.body.scrollHeight)', retries=3, timeout=30.1)
 
+            # Store the dialog entry
             entry = DialogEntry(question, conclusion)
             store_in_stm(entry)
+            # saves conversation following each input response to ./memory/stm/timestampmemory.json from memory.py
             save_conversation_memory({"dialog": {"instruction": question, "response": conclusion}})
         except Exception as e:
             logging.error(f"Error getting conclusion from easyAGI: {e}")
@@ -279,7 +340,7 @@ class OpenMind:
                 if self.message_container.client.connected:
                     self.message_container.remove(spinner)  # Correctly remove the spinner
             except KeyError:
-                logging.warning("Spinner element not found in message_container")
+                logging.warning("Spinner element not found in message_container.")
 
     async def run_javascript_with_retry(self, script, retries=5, timeout=12.0):
         for attempt in range(retries):
@@ -301,6 +362,9 @@ class OpenMind:
             logging.exception('Exception raised by task = %r', task)
 
     def read_log_file(self, file_path):
+        """
+        Read the content of a log file and return it.
+        """
         try:
             with open(file_path, 'r') as file:
                 return file.read()
@@ -319,17 +383,12 @@ class OpenMind:
             if result is not None:
                 JavaScriptRequest.resolve(request_id, result)
             else:
+                # Handle the case where 'result' is missing
                 JavaScriptRequest.reject(request_id, 'Missing result in JavaScript response')
                 logging.error(f"JavaScript response missing 'result' for request_id: {request_id}. Response: {msg}")
         else:
+            # Handle the case where 'request_id' is missing if needed
             logging.error(f"JavaScript response missing 'request_id'. Response: {msg}")
 
+        # Log the entire message for debugging purposes
         logging.debug(f"Received JavaScript response: {msg}")
-
-    async def notify_ui(self, message, type='info'):
-        """
-        Schedule a UI notification to be displayed in the main event loop.
-        """
-        if self.message_container.client.connected:
-            with self.message_container:
-                ui.notify(message, type=type)
