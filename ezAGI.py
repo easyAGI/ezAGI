@@ -86,8 +86,7 @@ def main():
         chat_tab = ui.tab('chat').classes('tab-style')
         logs_tab = ui.tab('logs').classes('tab-style')
         api_tab = ui.tab('APIk').classes('tab-style')
-        admin_tab = ui.tab('ADMIN').classes('tab-style').on('click', lambda: ui.open('/ollama'))
-
+        
     # create tab panels for the tabs
     with ui.tab_panels(tabs, value=chat_tab).props('style="background-color: rgba(255, 255, 255, 0.5);"').classes('response-style'):
         message_container = ui.tab_panel(chat_tab).props('style="background-color: rgba(255, 255, 255, 0.5);"').classes('items-stretch response-container')
@@ -122,10 +121,12 @@ def main():
     with ui.footer().classes('footer'), ui.column().classes('footer'):
         with ui.row().classes('w-full no-wrap items-center'):
             text = ui.input(placeholder='Enter text here').classes('input').on('keydown.enter', send)  # input field with enter key event
-        ui.markdown('[easyAGI](https://rage.pythai.net)').props('style="color: darkblue;"').classes('footer-link')
+        ui.markdown('[easyAGI](https://rage.pythai.net)').classes('footer-link')
 
     # openmind internal reasoning asynchronous task ensuring non-blocking execution and efficient concurrency
     asyncio.create_task(openmind.main_loop())
+
+
 
 logging.debug("starting easyAGI")
 ui.run(title='easyAGI')
