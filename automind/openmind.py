@@ -7,7 +7,6 @@
 # log internal reasoning conclusion     ./memory/logs/thoughts.json
 # log not premise                       ./memory/logs/notpremise.json
 # log short term memory input response  ./memory/stm/{timestamp}memory.json 
-# log internal reasoning                ./mindx/
 
 import os
 import time
@@ -125,7 +124,7 @@ class OpenMind:
                 if self.message_container.client.connected:
                     with self.message_container:
                         ui.notify('Groq API key not found. Please add the key first.', type='negative')
-                logging.warning("Groq API key not found")
+                logging.warning("Groq API key not found.")
         elif model_name == 'together':
             together_key = self.api_manager.get_api_key('together')
             if together_key:
@@ -139,7 +138,7 @@ class OpenMind:
                 if self.message_container.client.connected:
                     with self.message_container:
                         ui.notify('Together AI API key not found. Please add the key first.', type='negative')
-                logging.warning("Together AI API key not found")
+                logging.warning("Together AI API key not found.")
         else:
             if self.message_container.client.connected:
                 with self.message_container:
@@ -186,14 +185,14 @@ class OpenMind:
                 if self.message_container.client.connected:
                     with self.message_container:
                         ui.notify('LLaMA found running, but no models are available.')
-                logging.debug("LLaMA running on localhost:11434, but no models are available")
+                logging.debug("LLaMA running on localhost:11434, but no models are available.")
         else:
             self.agi_instance = None
             if not self.initialization_warning_shown:
                 if self.message_container.client.connected:
                     with self.message_container:
-                        ui.notify('No valid API key or LLaMA instance found. Please add an API key or start LLaMA')
-                logging.debug("No valid API key or LLaMA instance found. AGI not initialized")
+                        ui.notify('No valid API key or LLaMA instance found. Please add an API key or start LLaMA.')
+                logging.debug("No valid API key or LLaMA instance found. AGI not initialized.")
                 self.initialization_warning_shown = True
 
     def check_llama_running(self):
@@ -207,25 +206,25 @@ class OpenMind:
 
     async def get_conclusion_from_agi(self, prompt):
         """
-        Get a conclusion from the AGI based on the provided prompt
-        This method is asynchronous to allow non-blocking operations
+        Get a conclusion from the AGI based on the provided prompt.
+        This method is asynchronous to allow non-blocking operations.
         """
         if self.agi_instance is None:
-            return "AGI not initialized. Please add an API key or start LLaMA"
+            return "AGI not initialized. Please add an API key or start LLaMA."
         conclusion = await asyncio.get_event_loop().run_in_executor(None, self.agi_instance.get_conclusion_from_agi, prompt)
         return conclusion
 
     def communicate_response(self, conclusion):
         """
-        Log and print the conclusion from the AGI
+        Log and print the conclusion from the AGI.
         """
         self.display_internal_conclusion(conclusion)
         return conclusion
 
     async def reasoning_loop(self):
         """
-        Internal reasoning loop for continuous AGI reasoning without user interaction
-        This loop adds a prompt to the AGI and processes its conclusion periodically
+        Internal reasoning loop for continuous AGI reasoning without user interaction.
+        This loop adds a prompt to the AGI and processes its conclusion periodically.
         The conclusions are currently displayed in the response window and saved to ./memory/logs/thoughts.json including ./memory/logs/notpremise.json
         """
         while True:
@@ -252,15 +251,15 @@ class OpenMind:
             save_internal_reasoning({"timestamp": int(time.time()), "prompt": prompt, "conclusion": conclusion})
             if self.message_container.client.connected:
                 with self.message_container:
-                    ui.notify('Reasoning loop conclusion saved')
+                    ui.notify('Reasoning loop conclusion saved.')
 
-            await asyncio.sleep(48)  # Adjust the delay as necessary
+            await asyncio.sleep(300)  # Adjust the delay as necessary
 
     def display_internal_conclusion(self, conclusion):
         """
-        Display the internal reasoning conclusion in the response window and log it to a JSON file
+        Display the internal reasoning conclusion in the response window and log it to a JSON file.
         """
-        if conclusion != "No premises available for logic as conclusion":
+        if conclusion != "No premises available for logic as conclusion.":
             if self.message_container.client.connected:
                 with self.message_container:
                     response_message = ui.chat_message(name='intr', sent=False)
@@ -275,7 +274,7 @@ class OpenMind:
             "conclusion": conclusion
         }
         
-        if conclusion == "No premises available for logic as conclusion":
+        if conclusion == "No premises available for logic as conclusion.":
             log_file_path = "./memory/logs/notpremise.json"
         else:
             log_file_path = "./memory/logs/thoughts.json"
@@ -296,7 +295,7 @@ class OpenMind:
 
     async def main_loop(self):
         """
-        Main loop to handle both internal reasoning and user input
+        Main loop to handle both internal reasoning and user input.
         """
         reasoning_task = asyncio.create_task(self.reasoning_loop())
         reasoning_task.add_done_callback(self._handle_task_result)
@@ -341,7 +340,7 @@ class OpenMind:
                 if self.message_container.client.connected:
                     self.message_container.remove(spinner)  # Correctly remove the spinner
             except KeyError:
-                logging.warning("Spinner element not found in message_container")
+                logging.warning("Spinner element not found in message_container.")
 
     async def run_javascript_with_retry(self, script, retries=5, timeout=12.0):
         for attempt in range(retries):
@@ -364,7 +363,7 @@ class OpenMind:
 
     def read_log_file(self, file_path):
         """
-        Read the content of a log file and return it
+        Read the content of a log file and return it.
         """
         try:
             with open(file_path, 'r') as file:
