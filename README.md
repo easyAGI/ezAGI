@@ -49,6 +49,8 @@ Solution for no module named json error found while working with python3 after i
 ```bash
 python3 -m pip install ujson
 
+
+# OPENAI INSTALL IN WINDOW
 Solution for no module named openai error found while working with python3, then use this command:
 ```bash
 python3 -m pip install openai
