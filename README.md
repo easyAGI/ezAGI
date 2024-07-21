@@ -44,9 +44,10 @@ pip install -r requirements.txt
 # activate ezAGI.py with internal reasoning (EXPERIMENTAL)
 python3 ezAGI.py
 ```
-is possible that windows requires to install the requirements<br />
+is possible that windows requires<br />
 ```python
 python3 -m pip install -r requirements.txt
 ```
+to install the requirements
 
 
