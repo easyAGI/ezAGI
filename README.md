@@ -46,13 +46,14 @@ python3 ezAGI.py
 ```
 
 Solution for no module named json error found while working with python3 after installing through requirement file as well as separately, then use this command:
-
 ```bash
 python3 -m pip install ujson
 
 Solution for no module named openai error found while working with python3, then use this command:
+```bash
 python3 -m pip install openai
 
 Solution for no module named  error found while working with python3, then use this command:
+```bash
 python3 -m pip install groq
 
