@@ -13,9 +13,11 @@ import time
 from datetime import datetime
 from nicegui import ui  # importing ui for easyAGI
 from memory.memory import create_memory_folders, store_in_stm, save_conversation_memory, save_internal_reasoning, DialogEntry, save_valid_truth
+from webmind.ollama_handler import OllamaHandler  # Import OllamaHandler for modular Ollama interactions
 from automind.automind import FundamentalAGI
-from webmind.api import APIManager
 from webmind.chatter import GPT4o, GroqModel
+from webmind.api import APIManager
+
 import ujson as json
 import asyncio
 import logging
@@ -29,15 +31,23 @@ class OpenMind:
         self.api_manager = APIManager()
         self.agi_instance = None
         self.initialize_memory()
-        self.initialize_agi()
+        self.message_container = ui.column()
+        self.ollama_handler = OllamaHandler()  # initialize OllamaHandler instance
         self.internal_queue = asyncio.Queue()
         self.prompt = ""  # Initialize an empty prompt field
-        self.keys_container = None  # Placeholder for keys_container
-        self.message_container = None  # Placeholder for message_container
-        self.log = None  # Placeholder for log
+        self.keys_container = ui.column()  # initialize keys_container
+        self.log = None  # placeholder for log
+        self.initialization_warning_shown = False
 
     def initialize_memory(self):
         create_memory_folders()
+
+    def use_api_key(self, service, key):
+        self.api_manager.api_keys[service] = key
+        self.initialize_agi()
+        with self.message_container:
+            ui.notify(f'Using API key for {service}', type='positive')
+        logging.info(f'Using API key for {service}')
 
     def add_api_key(self):
         service = self.service_input.value.strip()
@@ -83,6 +93,36 @@ class OpenMind:
                 with self.keys_container:
                     ui.label('No API keys in storage')
 
+    def select_model(self, model_name):
+        if model_name == 'openai':
+            openai_key = self.api_manager.get_api_key('openai')
+            if openai_key:
+                chatter = GPT4o(openai_key)
+                self.agi_instance = FundamentalAGI(chatter)
+                with self.message_container:
+                    ui.notify('Using OpenAI for AGI')
+                logging.debug("AGI initialized with OpenAI")
+            else:
+                with self.message_container:
+                    ui.notify('OpenAI API key not found. Please add the key first.', type='negative')
+                logging.warning("OpenAI API key not found.")
+        elif model_name == 'groq':
+            groq_key = self.api_manager.get_api_key('groq')
+            if groq_key:
+                chatter = GroqModel(groq_key)
+                self.agi_instance = FundamentalAGI(chatter)
+                with self.message_container:
+                    ui.notify('Using Groq for AGI')
+                logging.debug("AGI initialized with Groq")
+            else:
+                with self.message_container:
+                    ui.notify('Groq API key not found. Please add the key first.', type='negative')
+                logging.warning("Groq API key not found.")
+        else:
+            with self.message_container:
+                ui.notify(f'Using {model_name} for AGI')
+            logging.debug(f"AGI initialized with {model_name}")
+
     def initialize_agi(self):
         openai_key = self.api_manager.get_api_key('openai')
         groq_key = self.api_manager.get_api_key('groq')
@@ -91,21 +131,34 @@ class OpenMind:
         if openai_key:
             chatter = GPT4o(openai_key)
             self.agi_instance = FundamentalAGI(chatter)
-            ui.notify('Using OpenAI for AGI')
+            with self.message_container:
+                ui.notify('Using OpenAI for AGI')
             logging.debug("AGI initialized with OpenAI")
         elif groq_key:
             chatter = GroqModel(groq_key)
             self.agi_instance = FundamentalAGI(chatter)
-            ui.notify('Using Groq for AGI')
+            with self.message_container:
+                ui.notify('Using Groq for AGI')
             logging.debug("AGI initialized with Groq")
         elif llama_running:
-            # Placeholder for future LLaMA integration
-            ui.notify('LLaMA found running, future integration coming')
-            logging.debug("LLaMA running on localhost:11434")
+            # Call ollama_handler to list models when LLaMA is found running
+            models = self.ollama_handler.list_models()
+            if models:
+                model_list = ", ".join(models)
+                with self.message_container:
+                    ui.notify(f'LLaMA found running. Models available: {model_list}')
+                logging.debug(f"LLaMA running on localhost:11434. Models available: {model_list}")
+            else:
+                with self.message_container:
+                    ui.notify('LLaMA found running, but no models are available.')
+                logging.debug("LLaMA running on localhost:11434, but no models are available.")
         else:
             self.agi_instance = None
-            ui.notify('No valid API key or LLaMA instance found. Please add an API key or start LLaMA.')
-            logging.debug("No valid API key or LLaMA instance found. AGI not initialized.")
+            if not self.initialization_warning_shown:
+                with self.message_container:
+                    ui.notify('No valid API key or LLaMA instance found. Please add an API key or start LLaMA.')
+                logging.debug("No valid API key or LLaMA instance found. AGI not initialized.")
+                self.initialization_warning_shown = True
 
     def check_llama_running(self):
         try:
@@ -149,15 +202,22 @@ class OpenMind:
                 if openai_key or groq_key or llama_running:
                     self.initialize_agi()
                 else:
-                    logging.debug("Waiting for API key or LLaMA instance...")
-                    await asyncio.sleep(5)  # Wait before checking again
+                    if not self.initialization_warning_shown:
+                        logging.debug("Waiting for API key or LLaMA instance...")
+                        with self.message_container:
+                            ui.notify('AGI not initialized add an API key or start LLaMA')
+                        self.initialization_warning_shown = True
+                    await asyncio.sleep(30)  # Wait before checking again
                     continue
 
             prompt = self.prompt  # Use the updated prompt from user input
             conclusion = await self.get_conclusion_from_agi(prompt)
             self.display_internal_conclusion(conclusion)
             save_internal_reasoning({"timestamp": int(time.time()), "prompt": prompt, "conclusion": conclusion})
-            await asyncio.sleep(10)  # Adjust the delay as necessary
+            with self.message_container:
+                ui.notify('Reasoning loop conclusion saved.')
+
+            await asyncio.sleep(300)  # Adjust the delay as necessary
 
     def display_internal_conclusion(self, conclusion):
         """
@@ -201,7 +261,8 @@ class OpenMind:
         """
         Main loop to handle both internal reasoning and user input.
         """
-        asyncio.create_task(self.reasoning_loop())
+        reasoning_task = asyncio.create_task(self.reasoning_loop())
+        reasoning_task.add_done_callback(self._handle_task_result)
 
         while True:
             prompt = await self.internal_queue.get()
@@ -247,12 +308,22 @@ class OpenMind:
 
     async def run_javascript_with_retry(self, script, retries=5, timeout=12.0):
         for attempt in range(retries):
+            task = asyncio.create_task(ui.run_javascript(script, timeout=timeout))
+            task.add_done_callback(self._handle_task_result)
             try:
-                await ui.run_javascript(script, timeout=timeout)
+                await task
                 return
             except TimeoutError:
                 logging.warning(f"JavaScript did not respond within {timeout} s on attempt {attempt + 1}")
         raise TimeoutError(f"JavaScript did not respond after {retries} attempts")
+
+    def _handle_task_result(self, task: asyncio.Task) -> None:
+        try:
+            task.result()
+        except asyncio.CancelledError:
+            pass  # Task cancellation should not be logged as an error.
+        except Exception as e:
+            logging.exception('Exception raised by task = %r', task)
 
     def read_log_file(self, file_path):
         """
