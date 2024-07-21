@@ -15,7 +15,7 @@ from nicegui import ui  # importing ui for easyAGI
 from memory.memory import create_memory_folders, store_in_stm, save_conversation_memory, save_internal_reasoning, DialogEntry, save_valid_truth
 from webmind.ollama_handler import OllamaHandler  # Import OllamaHandler for modular Ollama interactions
 from automind.automind import FundamentalAGI
-from webmind.chatter import GPT4o, GroqModel
+from webmind.chatter import GPT4o, GroqModel, TogetherModel
 from webmind.api import APIManager
 
 import ujson as json
@@ -45,8 +45,9 @@ class OpenMind:
     def use_api_key(self, service, key):
         self.api_manager.api_keys[service] = key
         self.initialize_agi()
-        with self.message_container:
-            ui.notify(f'Using API key for {service}', type='positive')
+        if self.message_container.client.connected:
+            with self.message_container:
+                ui.notify(f'Using API key for {service}', type='positive')
         logging.info(f'Using API key for {service}')
 
     def add_api_key(self):
@@ -57,7 +58,8 @@ class OpenMind:
             self.api_manager.api_keys[service] = api_key
             self.api_manager.save_api_key(service, api_key)
             self.initialize_agi()
-            ui.notify(f'API key for {service} added and loaded successfully')
+            if self.message_container.client.connected:
+                ui.notify(f'API key for {service} added and loaded successfully')
             self.service_input.value = ''
             self.key_input.value = ''
             ui.run_javascript('setTimeout(() => { window.location.href = "/"; }, 1000);')
@@ -70,7 +72,8 @@ class OpenMind:
             del self.api_manager.api_keys[service]
             self.api_manager.remove_api_key(service)
             self.initialize_agi()
-            ui.notify(f'API key for {service} removed successfully')
+            if self.message_container.client.connected:
+                ui.notify(f'API key for {service} removed successfully')
             self.list_api_keys()  # Refresh the list after deletion
         else:
             ui.notify(f'No API key found for {service}')
@@ -79,7 +82,7 @@ class OpenMind:
         if self.api_manager.api_keys:
             keys_list = [(service, key) for service, key in self.api_manager.api_keys.items()]
             logging.debug(f"Stored API keys: {keys_list}")
-            if self.keys_container:
+            if self.keys_container.client.connected:
                 self.keys_container.clear()
                 for service, key in keys_list:
                     with self.keys_container:
@@ -87,8 +90,8 @@ class OpenMind:
                         ui.button('Delete', on_click=lambda s=service: self.delete_api_key(s)).classes('ml-4')
                 ui.notify('Stored API keys:\n' + "\n".join([f"{service}: {key[:4]}...{key[-4:]}" for service, key in keys_list]))
         else:
-            ui.notify('No API keys in storage')
-            if self.keys_container:
+            if self.keys_container.client.connected:
+                ui.notify('No API keys in storage')
                 self.keys_container.clear()
                 with self.keys_container:
                     ui.label('No API keys in storage')
@@ -97,66 +100,98 @@ class OpenMind:
         if model_name == 'openai':
             openai_key = self.api_manager.get_api_key('openai')
             if openai_key:
-                chatter = GPT4o(openai_key)
+                chatter = GPT4o(openai_key)                     # openai
                 self.agi_instance = FundamentalAGI(chatter)
-                with self.message_container:
-                    ui.notify('Using OpenAI for AGI')
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify('Using OpenAI for AGI')
                 logging.debug("AGI initialized with OpenAI")
             else:
-                with self.message_container:
-                    ui.notify('OpenAI API key not found. Please add the key first.', type='negative')
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify('OpenAI API key not found. Please add the key first.', type='negative')
                 logging.warning("OpenAI API key not found.")
         elif model_name == 'groq':
             groq_key = self.api_manager.get_api_key('groq')
             if groq_key:
-                chatter = GroqModel(groq_key)
+                chatter = GroqModel(groq_key)                   # groq
                 self.agi_instance = FundamentalAGI(chatter)
-                with self.message_container:
-                    ui.notify('Using Groq for AGI')
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify('Using Groq for AGI')
                 logging.debug("AGI initialized with Groq")
             else:
-                with self.message_container:
-                    ui.notify('Groq API key not found. Please add the key first.', type='negative')
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify('Groq API key not found. Please add the key first.', type='negative')
                 logging.warning("Groq API key not found.")
+        elif model_name == 'together':
+            together_key = self.api_manager.get_api_key('together')
+            if together_key:
+                chatter = TogetherModel(together_key)  # together
+                self.agi_instance = FundamentalAGI(chatter)
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify('Using Together AI for AGI')
+                logging.debug("AGI initialized with Together AI")
+            else:
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify('Together AI API key not found. Please add the key first.', type='negative')
+                logging.warning("Together AI API key not found.")
         else:
-            with self.message_container:
-                ui.notify(f'Using {model_name} for AGI')
+            if self.message_container.client.connected:
+                with self.message_container:
+                    ui.notify(f'Using {model_name} for AGI')
             logging.debug(f"AGI initialized with {model_name}")
 
     def initialize_agi(self):
         openai_key = self.api_manager.get_api_key('openai')
         groq_key = self.api_manager.get_api_key('groq')
+        together_key = self.api_manager.get_api_key('together')
         llama_running = self.check_llama_running()
 
         if openai_key:
             chatter = GPT4o(openai_key)
             self.agi_instance = FundamentalAGI(chatter)
-            with self.message_container:
-                ui.notify('Using OpenAI for AGI')
+            if self.message_container.client.connected:
+                with self.message_container:
+                    ui.notify('using OpenAI for ezAGI')
             logging.debug("AGI initialized with OpenAI")
         elif groq_key:
             chatter = GroqModel(groq_key)
             self.agi_instance = FundamentalAGI(chatter)
-            with self.message_container:
-                ui.notify('Using Groq for AGI')
+            if self.message_container.client.connected:
+                with self.message_container:
+                    ui.notify('using Groq for ezAGI')
             logging.debug("AGI initialized with Groq")
+        elif together_key:
+            chatter = TogetherModel(together_key)
+            self.agi_instance = FundamentalAGI(chatter)
+            if self.message_container.client.connected:
+                with self.message_container:
+                    ui.notify('using Together AI for AezGI')
+            logging.debug("AGI initialized with Together AI")
         elif llama_running:
             # Call ollama_handler to list models when LLaMA is found running
             models = self.ollama_handler.list_models()
             if models:
                 model_list = ", ".join(models)
-                with self.message_container:
-                    ui.notify(f'LLaMA found running. Models available: {model_list}')
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify(f'LLaMA found running. Models available: {model_list}')
                 logging.debug(f"LLaMA running on localhost:11434. Models available: {model_list}")
             else:
-                with self.message_container:
-                    ui.notify('LLaMA found running, but no models are available.')
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify('LLaMA found running, but no models are available.')
                 logging.debug("LLaMA running on localhost:11434, but no models are available.")
         else:
             self.agi_instance = None
             if not self.initialization_warning_shown:
-                with self.message_container:
-                    ui.notify('No valid API key or LLaMA instance found. Please add an API key or start LLaMA.')
+                if self.message_container.client.connected:
+                    with self.message_container:
+                        ui.notify('No valid API key or LLaMA instance found. Please add an API key or start LLaMA.')
                 logging.debug("No valid API key or LLaMA instance found. AGI not initialized.")
                 self.initialization_warning_shown = True
 
@@ -183,8 +218,6 @@ class OpenMind:
         """
         Log and print the conclusion from the AGI.
         """
-        # uncomment below to show conclusion in the terminal
-        #logging.info(f"Communicating response: {conclusion}")
         self.display_internal_conclusion(conclusion)
         return conclusion
 
@@ -198,14 +231,16 @@ class OpenMind:
             if self.agi_instance is None:
                 openai_key = self.api_manager.get_api_key('openai')
                 groq_key = self.api_manager.get_api_key('groq')
+                together_key = self.api_manager.get_api_key('together')
                 llama_running = self.check_llama_running()
-                if openai_key or groq_key or llama_running:
+                if openai_key or groq_key or together_key or llama_running:
                     self.initialize_agi()
                 else:
                     if not self.initialization_warning_shown:
                         logging.debug("Waiting for API key or LLaMA instance...")
-                        with self.message_container:
-                            ui.notify('AGI not initialized add an API key or start LLaMA')
+                        if self.message_container.client.connected:
+                            with self.message_container:
+                                ui.notify('AGI not initialized add an API key or start LLaMA')
                         self.initialization_warning_shown = True
                     await asyncio.sleep(30)  # Wait before checking again
                     continue
@@ -214,8 +249,9 @@ class OpenMind:
             conclusion = await self.get_conclusion_from_agi(prompt)
             self.display_internal_conclusion(conclusion)
             save_internal_reasoning({"timestamp": int(time.time()), "prompt": prompt, "conclusion": conclusion})
-            with self.message_container:
-                ui.notify('Reasoning loop conclusion saved.')
+            if self.message_container.client.connected:
+                with self.message_container:
+                    ui.notify('Reasoning loop conclusion saved.')
 
             await asyncio.sleep(300)  # Adjust the delay as necessary
 
@@ -224,7 +260,7 @@ class OpenMind:
         Display the internal reasoning conclusion in the response window and log it to a JSON file.
         """
         if conclusion != "No premises available for logic as conclusion.":
-            if self.message_container:
+            if self.message_container.client.connected:
                 with self.message_container:
                     response_message = ui.chat_message(name='intr', sent=False)
                     response_message.clear()
@@ -275,7 +311,7 @@ class OpenMind:
             save_conversation_memory({"dialog": {"instruction": prompt, "response": conclusion}})
 
     async def send_message(self, question):
-        if self.message_container:
+        if self.message_container.client.connected:
             with self.message_container:
                 ui.chat_message(text=question, name='query', sent=True)
                 response_message = ui.chat_message(name='ezAGI', sent=False)
@@ -283,7 +319,7 @@ class OpenMind:
 
         try:
             conclusion = await self.get_conclusion_from_agi(question)
-            if response_message:
+            if response_message and self.message_container.client.connected:
                 response_message.clear()
                 with response_message:
                     ui.html(conclusion)
@@ -301,7 +337,7 @@ class OpenMind:
                 self.log.push(f"Error getting conclusion from easyAGI: {e}")
         finally:
             try:
-                if self.message_container:
+                if self.message_container.client.connected:
                     self.message_container.remove(spinner)  # Correctly remove the spinner
             except KeyError:
                 logging.warning("Spinner element not found in message_container.")
