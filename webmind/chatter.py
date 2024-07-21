@@ -1,23 +1,38 @@
 # chatter.py (c) Gregory L. Magnusson MIT license 2024
 # modular file to include input response mechanisms for multi-model environment
-# currently accepts openai groq from API llama3 from URL
+# currently accepts together openai groq from API and ollama models from URL
 
 import openai
 from groq import Groq
+from together import AsyncTogether
 import subprocess
 import asyncio
 import logging
+import os
 
 class GPT4o:
     def __init__(self, openai_api_key):
         self.openai_api_key = openai_api_key
         openai.api_key = self.openai_api_key
+        self.current_model = "gpt-4o"  # Default model
 
-    def generate_response(self, knowledge, model="gpt-4o"):
+    def set_model(self, model_name):
+        """
+        Set the current model to the specified model_name.
+        """
+        self.current_model = model_name
+
+    def get_current_model(self):
+        """
+        Get the name of the current model.
+        """
+        return self.current_model
+
+    def generate_response(self, knowledge):
         prompt = f"{knowledge}"
         try:
             response = openai.chat.completions.create(
-                model=model,
+                model=self.current_model,
                 messages=[
                     {"role": "system", "content": ""},
                     {"role": "user", "content": prompt}
@@ -32,8 +47,21 @@ class GPT4o:
 class GroqModel:
     def __init__(self, groq_api_key):
         self.client = Groq(api_key=groq_api_key)
+        self.current_model = "mixtral-8x7b-32768"  # Default model
 
-    def generate_response(self, knowledge, model="mixtral-8x7b-32768"):
+    def set_model(self, model_name):
+        """
+        Set the current model to the specified model_name.
+        """
+        self.current_model = model_name
+
+    def get_current_model(self):
+        """
+        Get the name of the current model.
+        """
+        return self.current_model
+
+    def generate_response(self, knowledge):
         prompt = f"{knowledge}"
         try:
             chat_completion = self.client.chat.completions.create(
@@ -41,7 +69,7 @@ class GroqModel:
                     {"role": "system", "content": ""},
                     {"role": "user", "content": prompt}
                 ],
-                model=model,
+                model=self.current_model,
             )
             decision = chat_completion.choices[0].message.content
             return decision.lower()
@@ -70,55 +98,6 @@ class OllamaModel:
             logging.error(f"ollama api error: {e}")
             return "error: unable to generate a response due to an issue with the ollama api."
 
-    async def show_ollama_info_async(self):
-        """
-        Show information about the Ollama service.
-        """
-        command = "ollama show"
-        try:
-            result = await asyncio.create_subprocess_shell(command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-            stdout, stderr = await result.communicate()
-            if result.returncode == 0:
-                return stdout.decode().strip()
-            else:
-                logging.error(f"ollama api error: {stderr.decode().strip()}")
-                return ""
-        except Exception as e:
-            logging.error(f"ollama api error: {e}")
-            return ""
-
-    def list_models(self):
-        """
-        List all available models in the Ollama service.
-        """
-        command = "ollama list"
-        try:
-            result = subprocess.run(command, shell=True, capture_output=True, text=True)
-            if result.returncode == 0:
-                return result.stdout.strip().splitlines()
-            else:
-                logging.error(f"ollama api error: {result.stderr}")
-                return []
-        except Exception as e:
-            logging.error(f"ollama api error: {e}")
-            return []
-
-    def install_ollama(self):
-        """
-        Install Ollama using the provided installation script.
-        """
-        command = "curl -fsSL https://ollama.com/install.sh | sh"
-        try:
-            result = subprocess.run(command, shell=True, capture_output=True, text=True)
-            if result.returncode == 0:
-                return "Ollama installation successful."
-            else:
-                logging.error(f"ollama install error: {result.stderr}")
-                return "error: unable to install ollama."
-        except Exception as e:
-            logging.error(f"ollama install error: {e}")
-            return "error: unable to install ollama."
-
 def check_ollama_installation():
     command = "ollama list"
     try:
@@ -132,3 +111,42 @@ def check_ollama_installation():
     except Exception as e:
         logging.error(f"Failed to check Ollama installation: {e}")
         return False
+
+class TogetherModel:
+    def __init__(self, api_key):
+        self.api_key = api_key
+        self.async_client = AsyncTogether(api_key=os.environ.get("TOGETHER_API_KEY"))
+        self.current_model = "mistralai/Mixtral-8x7B-Instruct-v0.1"  # Default model
+
+    def set_model(self, model_name):
+        """
+        Set the current model to the specified model_name.
+        """
+        self.current_model = model_name
+
+    def get_current_model(self):
+        """
+        Get the name of the current model.
+        """
+        return self.current_model
+
+    async def generate_response_async(self, knowledge):
+        """
+        Generate a response from the Together AI model based on the given knowledge prompt.
+        """
+        messages = [{"role": "user", "content": knowledge}]
+        try:
+            response = await self.async_client.chat.completions.create(
+                model=self.current_model,
+                messages=messages
+            )
+            return response.choices[0].message.content.lower()
+        except Exception as e:
+            logging.error(f"together.ai api error: {e}")
+            return "error: unable to generate a response due to an issue with the together.ai api."
+
+    def generate_response(self, knowledge):
+        """
+        Synchronous wrapper for the asynchronous generate_response_async method.
+        """
+        return asyncio.run(self.generate_response_async(knowledge))
