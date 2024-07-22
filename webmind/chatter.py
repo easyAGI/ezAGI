@@ -1,6 +1,7 @@
 # chatter.py (c) Gregory L. Magnusson MIT license 2024
 # modular file to include input response mechanisms for multi-model environment
-# currently accepts together openai groq from API and ollama models from URL
+# API name must be openai groq or together from API
+# ollama integration is from URL
 
 import openai
 from groq import Groq
@@ -115,7 +116,7 @@ def check_ollama_installation():
 class TogetherModel:
     def __init__(self, api_key):
         self.api_key = api_key
-        self.async_client = AsyncTogether(api_key=os.environ.get("TOGETHER_API_KEY"))
+        self.async_client = AsyncTogether(api_key=api_key)  # Use the provided api_key directly
         self.current_model = "mistralai/Mixtral-8x7B-Instruct-v0.1"  # Default model
 
     def set_model(self, model_name):
