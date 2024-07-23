@@ -17,7 +17,6 @@ from webmind.ollama_handler import OllamaHandler  # Import OllamaHandler for mod
 from automind.automind import FundamentalAGI
 from webmind.chatter import GPT4o, GroqModel, TogetherModel
 from webmind.api import APIManager
-
 import ujson as json
 import asyncio
 import logging
@@ -64,7 +63,7 @@ class OpenMind:
             self.key_input.value = ''
             ui.run_javascript('setTimeout(() => { window.location.href = "/"; }, 1000);')
         else:
-            ui.notify('Please provide both service name and API key')
+            ui.notify('Provide both service name and API key')
 
     def delete_api_key(self, service):
         logging.debug(f"Deleting API key for {service}")
@@ -97,53 +96,56 @@ class OpenMind:
                     ui.label('No API keys in storage')
 
     def select_model(self, model_name):
+        def notify_user(message, message_type='info'):
+            if self.message_container.client.connected:
+                with self.message_container:
+                    ui.notify(message, type=message_type)
+
+        def log_and_notify(message, level='info', message_type='info'):
+            if level == 'debug':
+                logging.debug(message)
+            elif level == 'warning':
+                logging.warning(message)
+            notify_user(message, message_type)
+
+        # Clean up any existing AGI instance or chatter model
+        if hasattr(self, 'agi_instance') and self.agi_instance is not None:
+            self.agi_instance = None
+
+        model_initialized = False
+
         if model_name == 'openai':
             openai_key = self.api_manager.get_api_key('openai')
             if openai_key:
-                chatter = GPT4o(openai_key)                     # openai
+                chatter = GPT4o(openai_key)  # openai
                 self.agi_instance = FundamentalAGI(chatter)
-                if self.message_container.client.connected:
-                    with self.message_container:
-                        ui.notify('Using OpenAI for AGI')
-                logging.debug("AGI initialized with OpenAI")
+                log_and_notify('Using OpenAI for AGI')
+                model_initialized = True
             else:
-                if self.message_container.client.connected:
-                    with self.message_container:
-                        ui.notify('OpenAI API key not found. Please add the key first.', type='negative')
-                logging.warning("OpenAI API key not found.")
-        elif model_name == 'groq':
+                log_and_notify('OpenAI API key not found. Please add the key first.', 'warning', 'negative')
+
+        if model_name == 'groq' and not model_initialized:
             groq_key = self.api_manager.get_api_key('groq')
             if groq_key:
-                chatter = GroqModel(groq_key)                   # groq
+                chatter = GroqModel(groq_key)  # groq
                 self.agi_instance = FundamentalAGI(chatter)
-                if self.message_container.client.connected:
-                    with self.message_container:
-                        ui.notify('Using Groq for AGI')
-                logging.debug("AGI initialized with Groq")
+                log_and_notify('Using Groq for AGI')
+                model_initialized = True
             else:
-                if self.message_container.client.connected:
-                    with self.message_container:
-                        ui.notify('Groq API key not found. Please add the key first.', type='negative')
-                logging.warning("Groq API key not found.")
-        elif model_name == 'together':
+                log_and_notify('Groq API key not found. Please add the key first.', 'warning', 'negative')
+
+        if model_name == 'together' and not model_initialized:
             together_key = self.api_manager.get_api_key('together')
             if together_key:
                 chatter = TogetherModel(together_key)  # together
                 self.agi_instance = FundamentalAGI(chatter)
-                if self.message_container.client.connected:
-                    with self.message_container:
-                        ui.notify('Using Together AI for AGI')
-                logging.debug("AGI initialized with Together AI")
+                log_and_notify('Using Together AI for AGI')
+                model_initialized = True
             else:
-                if self.message_container.client.connected:
-                    with self.message_container:
-                        ui.notify('Together AI API key not found. Please add the key first.', type='negative')
-                logging.warning("Together AI API key not found.")
-        else:
-            if self.message_container.client.connected:
-                with self.message_container:
-                    ui.notify(f'Using {model_name} for AGI')
-            logging.debug(f"AGI initialized with {model_name}")
+                log_and_notify('Together AI API key not found. Please add the key first.', 'warning', 'negative')
+
+        if not model_initialized:
+            log_and_notify(f'Failed to initialize AGI with {model_name}', 'warning', 'negative')
 
     def initialize_agi(self):
         openai_key = self.api_manager.get_api_key('openai')
@@ -156,21 +158,21 @@ class OpenMind:
             self.agi_instance = FundamentalAGI(chatter)
             if self.message_container.client.connected:
                 with self.message_container:
-                    ui.notify('using OpenAI for ezAGI')
+                    ui.notify('Using OpenAI for ezAGI')
             logging.debug("AGI initialized with OpenAI")
         elif groq_key:
             chatter = GroqModel(groq_key)
             self.agi_instance = FundamentalAGI(chatter)
             if self.message_container.client.connected:
                 with self.message_container:
-                    ui.notify('using Groq for ezAGI')
+                    ui.notify('Using Groq for ezAGI')
             logging.debug("AGI initialized with Groq")
         elif together_key:
             chatter = TogetherModel(together_key)
             self.agi_instance = FundamentalAGI(chatter)
             if self.message_container.client.connected:
                 with self.message_container:
-                    ui.notify('using Together AI for AezGI')
+                    ui.notify('Using Together AI for ezAGI')
             logging.debug("AGI initialized with Together AI")
         elif llama_running:
             # Call ollama_handler to list models when LLaMA is found running
@@ -185,14 +187,14 @@ class OpenMind:
                 if self.message_container.client.connected:
                     with self.message_container:
                         ui.notify('LLaMA found running, but no models are available.')
-                logging.debug("LLaMA running on localhost:11434, but no models are available.")
+                logging.debug("LLaMA running on localhost:11434, but no models are available")
         else:
             self.agi_instance = None
             if not self.initialization_warning_shown:
                 if self.message_container.client.connected:
                     with self.message_container:
-                        ui.notify('No valid API key or LLaMA instance found. Please add an API key or start LLaMA.')
-                logging.debug("No valid API key or LLaMA instance found. AGI not initialized.")
+                        ui.notify('No valid API key or LLaMA instance found. Please add an API key or start LLaMA')
+                logging.debug("No valid API key or LLaMA instance found. AGI not initialized")
                 self.initialization_warning_shown = True
 
     def check_llama_running(self):
@@ -206,11 +208,11 @@ class OpenMind:
 
     async def get_conclusion_from_agi(self, prompt):
         """
-        Get a conclusion from the AGI based on the provided prompt.
-        This method is asynchronous to allow non-blocking operations.
+        Get a conclusion from the AGI based on the provided prompt
+        This method is asynchronous to allow non-blocking operations
         """
         if self.agi_instance is None:
-            return "AGI not initialized. Please add an API key or start LLaMA."
+            return "AGI not initialized. Please add an API key or start LLaMA"
         conclusion = await asyncio.get_event_loop().run_in_executor(None, self.agi_instance.get_conclusion_from_agi, prompt)
         return conclusion
 
@@ -223,8 +225,8 @@ class OpenMind:
 
     async def reasoning_loop(self):
         """
-        Internal reasoning loop for continuous AGI reasoning without user interaction.
-        This loop adds a prompt to the AGI and processes its conclusion periodically.
+        Internal reasoning loop for continuous AGI reasoning without user interaction
+        adding a prompt to AGI processesing its conclusion periodically
         The conclusions are currently displayed in the response window and saved to ./memory/logs/thoughts.json including ./memory/logs/notpremise.json
         """
         while True:
@@ -240,7 +242,7 @@ class OpenMind:
                         logging.debug("Waiting for API key or LLaMA instance...")
                         if self.message_container.client.connected:
                             with self.message_container:
-                                ui.notify('AGI not initialized add an API key or start LLaMA')
+                                ui.notify('AGI not initialized. Add an API key or start LLaMA.')
                         self.initialization_warning_shown = True
                     await asyncio.sleep(30)  # Wait before checking again
                     continue
@@ -251,15 +253,15 @@ class OpenMind:
             save_internal_reasoning({"timestamp": int(time.time()), "prompt": prompt, "conclusion": conclusion})
             if self.message_container.client.connected:
                 with self.message_container:
-                    ui.notify('Reasoning loop conclusion saved.')
+                    ui.notify('Reasoning loop conclusion saved')
 
-            await asyncio.sleep(300)  # Adjust the delay as necessary
+            await asyncio.sleep(10)  # Adjust the delay as necessary
 
     def display_internal_conclusion(self, conclusion):
         """
-        Display the internal reasoning conclusion in the response window and log it to a JSON file.
+        Display internal reasoning conclusion in the response window and log it to a JSON file
         """
-        if conclusion != "No premises available for logic as conclusion.":
+        if conclusion != "No premises available for logic as conclusion":
             if self.message_container.client.connected:
                 with self.message_container:
                     response_message = ui.chat_message(name='intr', sent=False)
@@ -340,7 +342,7 @@ class OpenMind:
                 if self.message_container.client.connected:
                     self.message_container.remove(spinner)  # Correctly remove the spinner
             except KeyError:
-                logging.warning("Spinner element not found in message_container.")
+                logging.warning("Spinner element not found in message_container")
 
     async def run_javascript_with_retry(self, script, retries=5, timeout=12.0):
         for attempt in range(retries):
