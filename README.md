@@ -23,6 +23,15 @@ adjective: generative
     relating to or capable of production or reproduction
 ```
 
+```python
+in·tel·li·gence
+/inˈteləj(ə)ns/
+
+noun: intelligence
+
+    the ability to acquire and apply knowledge and skills
+```
+
 # requirements
 python3 > 3.7<br />
 pip<br />
