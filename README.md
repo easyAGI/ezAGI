@@ -3,7 +3,7 @@ easy Augmented Generative Intelligence for LLM
 
 an exercise in multi-model integration for LLM rational enhancement<br />
 
-an expression of enhanced reasoning for LLM as log files with responses to hightlight internal reasoning as a working concept of machine reasoning
+an expression of enhanced reasoning for LLM with ./memory/stm and advanced log files with responses to hightlight internal reasoning as working concept of machine reasoning
 
 # requirements
 python3 > 3.7<br />
