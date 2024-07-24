@@ -13,6 +13,16 @@ adjective: augmented
 
 an expression of enhanced reasoning for LLM with ./memory/stm and advanced log files with responses to hightlight internal reasoning as working concept of machine reasoning
 
+```python
+gen·er·a·tive
+/ˈjen(ə)rədiv,ˈjenəˌrādiv/
+
+adjective: generative
+
+    denoting an approach to any field of linguistics that involves applying a finite set of rules to linguistic input in order to produce all and only the well-formed items of a language
+    relating to or capable of production or reproduction
+```
+
 # requirements
 python3 > 3.7<br />
 pip<br />
