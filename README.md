@@ -3,6 +3,14 @@ easy Augmented Generative Intelligence for LLM
 
 an exercise in multi-model integration for LLM rational enhancement<br />
 
+```python
+aug·ment·ed
+/ôɡˈmen(t)əd/
+
+adjective: augmented
+    having been made greater in size or value
+```
+
 an expression of enhanced reasoning for LLM with ./memory/stm and advanced log files with responses to hightlight internal reasoning as working concept of machine reasoning
 
 # requirements
