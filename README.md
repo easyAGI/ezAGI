@@ -1,15 +1,14 @@
 # ezAGI
 easy Augmented Generative Intelligence for LLM
 
-an exercise in multi-model integration for LLM rational enhancement>br />
-API handling for together groq and openai<br />
+an exercise in multi-model integration for LLM rational enhancement<br />
 
 an expression of enhanced reasoning for LLM as log files with responses to hightlight internal reasoning as a working concept of machine reasoning
-
 
 # requirements
 python3 > 3.7<br />
 pip<br />
+# API handling for together groq and openai<br />
 <a href="https://console.groq.com/docs/quickstart">groq API key</a> or <br />
 <a href="https://openai.com/index/openai-api/">openai API key</a> or <br />
 <a href="https://api.together.xyz/signin?redirectUrl=/settings/api-keys">together.ai</a><br />
