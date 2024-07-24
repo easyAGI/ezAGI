@@ -11,8 +11,6 @@ adjective: augmented
     having been made greater in size or value
 ```
 
-an expression of enhanced reasoning for LLM with ./memory/stm and advanced log files with responses to hightlight internal reasoning as working concept of machine reasoning
-
 ```python
 gen·er·a·tive
 /ˈjen(ə)rədiv,ˈjenəˌrādiv/
@@ -31,6 +29,9 @@ noun: intelligence
 
     the ability to acquire and apply knowledge and skills
 ```
+
+easyAGI
+an expression of enhanced reasoning for LLM with ./memory/stm and advanced log files with responses to hightlight internal reasoning as working concept of machine reasoning
 
 # requirements
 python3 > 3.7<br />
