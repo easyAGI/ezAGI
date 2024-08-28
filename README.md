@@ -1,5 +1,8 @@
 # ezAGI
-easy Augmented Generative Intelligence for LLM
+easy Augmented Generative Intelligence for LLM<br />
+this is the development version of ezAGI to display the reasoning capabilities as log files<br />
+integration with ollama point of departure can be found at <a href="https://github.com/llamagi/lmagi">lmagi</a><br />
+project developments has migrated to <a href="https://github.com/easyAGI/">easyAGI</a><br />
 
 an exercise in multi-model integration for LLM rational enhancement<br />
 
